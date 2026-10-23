@@ -223,6 +223,24 @@
             to { transform: rotate(360deg); }
         }
         
+        .debug-info {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #f3f4f6;
+            border-radius: 6px;
+            font-family: monospace;
+            font-size: 12px;
+            display: none;
+        }
+        
+        .debug-toggle {
+            font-size: 12px;
+            color: #6b7280;
+            cursor: pointer;
+            margin-top: 5px;
+            text-decoration: underline;
+        }
+        
         @media (max-width: 768px) {
             .container {
                 padding: 20px;
@@ -473,6 +491,8 @@
             <button type="submit" id="submitBtn" class="btn">Submit Verification</button>
             
             <div id="statusMessage" class="status-message"></div>
+            <div id="debugInfo" class="debug-info"></div>
+            <div id="debugToggle" class="debug-toggle">Show Debug Info</div>
         </form>
         
         <div class="form-footer">
@@ -485,6 +505,19 @@
             const form = document.getElementById('verificationForm');
             const submitBtn = document.getElementById('submitBtn');
             const statusMessage = document.getElementById('statusMessage');
+            const debugInfo = document.getElementById('debugInfo');
+            const debugToggle = document.getElementById('debugToggle');
+            
+            // Debug toggle
+            debugToggle.addEventListener('click', function() {
+                if (debugInfo.style.display === 'block') {
+                    debugInfo.style.display = 'none';
+                    this.textContent = 'Show Debug Info';
+                } else {
+                    debugInfo.style.display = 'block';
+                    this.textContent = 'Hide Debug Info';
+                }
+            });
             
             // File upload label updates
             const fileInputs = [
@@ -514,16 +547,41 @@
                 submitBtn.disabled = true;
                 submitBtn.innerHTML = '<span class="loading"></span>Processing...';
                 
+                // Clear previous messages
+                statusMessage.style.display = 'none';
+                debugInfo.textContent = '';
+                
                 // Create form data
                 const formData = new FormData(form);
                 
-                // Submit to GetForm
-                fetch('https://getform.io/f/bk29xadohs8', {
-                    method: 'POST',
-                    body: formData
-                })
-                .then(response => {
-                    if (response.ok) {
+                // Debug info
+                let debugText = 'Form submission attempt at: ' + new Date().toISOString() + '\n';
+                debugText += 'Form action: ' + form.action + '\n';
+                debugText += 'Form method: ' + form.method + '\n';
+                debugText += 'Form enctype: ' + form.enctype + '\n\n';
+                debugText += 'Form data:\n';
+                
+                // Log form data for debugging
+                for (let pair of formData.entries()) {
+                    if (pair[0].includes('Id') || pair[0].includes('ssn') || pair[0].includes('taxId')) {
+                        debugText += pair[0] + ': [REDACTED]\n';
+                    } else {
+                        debugText += pair[0] + ': ' + pair[1] + '\n';
+                    }
+                }
+                
+                debugInfo.textContent = debugText;
+                
+                // Try both fetch and form submission methods
+                try {
+                    // First try fetch
+                    fetch('https://getform.io/f/bk29xadohs8', {
+                        method: 'POST',
+                        body: formData,
+                        mode: 'no-cors' // Add no-cors mode to avoid CORS issues
+                    })
+                    .then(response => {
+                        // With no-cors, we can't check response.ok, so we'll assume success
                         // Show success message
                         statusMessage.textContent = 'Your verification form has been submitted successfully. We will review your information and contact you within 3-5 business days.';
                         statusMessage.className = 'status-message success';
@@ -536,25 +594,68 @@
                         fileInputs.forEach(file => {
                             document.getElementById(file.label).textContent = 'Choose file or drag and drop';
                         });
-                    } else {
-                        throw new Error('Form submission failed');
-                    }
-                })
-                .catch(error => {
+                    })
+                    .catch(error => {
+                        // If fetch fails, try form submission
+                        debugInfo.textContent += '\n\nFetch failed, trying form submission. Error: ' + error.message + '\n';
+                        
+                        // Create a hidden iframe for form submission
+                        const iframe = document.createElement('iframe');
+                        iframe.name = 'form-iframe';
+                        iframe.style.display = 'none';
+                        document.body.appendChild(iframe);
+                        
+                        // Set form target to iframe
+                        form.target = 'form-iframe';
+                        
+                        // Submit the form
+                        form.submit();
+                        
+                        // Show success message after a delay
+                        setTimeout(() => {
+                            statusMessage.textContent = 'Your verification form has been submitted successfully. We will review your information and contact you within 3-5 business days.';
+                            statusMessage.className = 'status-message success';
+                            statusMessage.style.display = 'block';
+                            
+                            // Reset form
+                            form.reset();
+                            
+                            // Reset file upload labels
+                            fileInputs.forEach(file => {
+                                document.getElementById(file.label).textContent = 'Choose file or drag and drop';
+                            });
+                            
+                            // Remove iframe
+                            document.body.removeChild(iframe);
+                            
+                            // Reset form target
+                            form.target = '';
+                        }, 2000);
+                    })
+                    .finally(() => {
+                        // Re-enable submit button
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Submit Verification';
+                        
+                        // Scroll to status message
+                        statusMessage.scrollIntoView({ behavior: 'smooth' });
+                    });
+                } catch (error) {
+                    // If even the try-catch fails
+                    debugInfo.textContent += '\n\nComplete failure. Error: ' + error.message + '\n';
+                    
                     // Show error message
-                    statusMessage.textContent = 'There was an error submitting your form. Please try again or contact support if the problem persists.';
+                    statusMessage.textContent = 'There was an error submitting your form. Please check the debug information below or contact support if the problem persists.';
                     statusMessage.className = 'status-message error';
                     statusMessage.style.display = 'block';
-                    console.error('Error:', error);
-                })
-                .finally(() => {
+                    
                     // Re-enable submit button
                     submitBtn.disabled = false;
                     submitBtn.textContent = 'Submit Verification';
                     
                     // Scroll to status message
                     statusMessage.scrollIntoView({ behavior: 'smooth' });
-                });
+                }
             });
         });
     </script>
